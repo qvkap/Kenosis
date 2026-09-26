@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+./configure \
+    --prefix=/usr \
+    --syslibdir=/lib \
+    --disable-shared \
+    --enable-static
+
+make
+make DESTDIR="$1" install
+
+# Delete unneeded files
+rm -rf "$1/lib"
+rm -rf "$1/usr/share"
