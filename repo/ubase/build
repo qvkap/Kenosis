@@ -1,4 +1,4 @@
 #!/bin/sh -e
 
-make LDFLAGS="-static" ubase-box
-make PREFIX=/usr DESTDIR="$1" ubase-box-install
+make CC="${CC:-cc}" LDFLAGS="-static" ubase-box
+make CC="${CC:-cc}" PREFIX=/usr DESTDIR="$1" ubase-box-install

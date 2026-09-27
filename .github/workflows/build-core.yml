@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Base Build Dependencies
-        run: apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz
+        run: apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz ncurses-dev ncurses-static
 
       - name: Setup KISS Package Manager
         run: |
@@ -36,13 +36,13 @@ jobs:
           kiss build cproc
           kiss install cproc
 
-      - name: Set CC to cproc for system packages
-        run: echo "CC=cproc" >> $GITHUB_ENV
-
-      - name: Build musl & linux-headers
+      - name: Build musl & linux-headers (with GCC)
         run: |
           kiss build musl && kiss install musl
           kiss build linux-headers && kiss install linux-headers
+
+      - name: Set CC to cproc for system packages
+        run: echo "CC=cproc" >> $GITHUB_ENV
 
       - name: Build Core Utilities (sbase, ubase, sinit, daemontools-encore)
         run: |
@@ -60,7 +60,7 @@ jobs:
 
       - name: Assemble RootFS
         run: |
-          mkdir -p /mnt/rootfs/{bin,sbin,dev,proc,sys,tmp,var,etc,usr/bin,usr/sbin,usr/lib,lib}
+          mkdir -p /mnt/rootfs/bin /mnt/rootfs/sbin /mnt/rootfs/dev /mnt/rootfs/proc /mnt/rootfs/sys /mnt/rootfs/tmp /mnt/rootfs/var /mnt/rootfs/etc /mnt/rootfs/usr/bin /mnt/rootfs/usr/sbin /mnt/rootfs/usr/lib /mnt/rootfs/lib
 
           # Since packages are installed directly to the Alpine container's root,
           # we need to copy them from the system directories to our initramfs root.
@@ -77,7 +77,7 @@ jobs:
           # We'll rely on the tarballs created by kiss build to extract exactly what we need
           for pkg in musl sbase ubase sinit daemontools-encore yash vis dvtm abduco; do
             # Find the built tarball
-            tarball=$(find /root/.cache/kiss/bin -name "$pkg-*.tar.gz" | head -n 1)
+            tarball=$(find ~/.cache/kiss/bin -name "$pkg-*.tar.gz" | head -n 1)
             if [ -n "$tarball" ]; then
               tar -xzf "$tarball" -C /mnt/rootfs/
             fi
@@ -86,6 +86,7 @@ jobs:
           # Minimal configuration
           echo '#!/usr/bin/yash' > /mnt/rootfs/bin/rc.init
           echo 'echo "sinit is init"' >> /mnt/rootfs/bin/rc.init
+          echo 'exec /usr/bin/yash' >> /mnt/rootfs/bin/rc.init
           chmod +x /mnt/rootfs/bin/rc.init
 
           # Crucial symlinks for kernel boot
@@ -134,7 +135,7 @@ jobs:
             /iso
 
       - name: Upload ISO Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kenosis-base-x86_64.iso
           path: /kenosis-base-x86_64.iso

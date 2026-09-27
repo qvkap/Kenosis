@@ -1,8 +1,7 @@
 #!/bin/sh -e
 
-./configure \
-    --prefix=/usr \
-    --enable-static
+LDFLAGS="-static" ./configure \
+    --prefix=/usr
 
-make
-make DESTDIR="$1" install
+make CC="${CC:-cc}"
+make CC="${CC:-cc}" DESTDIR="$1" install
