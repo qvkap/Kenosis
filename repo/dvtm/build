@@ -1,4 +1,6 @@
 #!/bin/sh -e
 
-make LDFLAGS="-static"
-make PREFIX=/usr DESTDIR="$1" install
+sed -i 's/LDFLAGS  =/LDFLAGS  = -static/' config.mk
+
+make CC="${CC:-cc}"
+make CC="${CC:-cc}" PREFIX=/usr DESTDIR="$1" install
