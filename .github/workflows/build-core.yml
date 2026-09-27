@@ -31,6 +31,7 @@ jobs:
           echo "KISS_ROOT=/" >> $GITHUB_ENV
           echo "KISS_PATH=$PWD/repo" >> $GITHUB_ENV
           echo "KISS_PROMPT=0" >> $GITHUB_ENV
+          echo "KISS_HASH=sha256" >> $GITHUB_ENV
 
       - name: Bootstrap QBE
         run: |
