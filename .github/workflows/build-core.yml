@@ -25,6 +25,8 @@ jobs:
           echo "KISS_ROOT=/" >> $GITHUB_ENV
           echo "KISS_PATH=$PWD/repo" >> $GITHUB_ENV
           echo "KISS_PROMPT=0" >> $GITHUB_ENV
+          echo "LOGNAME=root" >> $GITHUB_ENV
+          echo "USER=root" >> $GITHUB_ENV
 
       - name: Bootstrap QBE
         run: |
@@ -128,7 +130,7 @@ jobs:
           cp /usr/share/syslinux/ldlinux.c32 /iso/boot/syslinux/
 
           xorriso -as mkisofs \
-            -o /kenosis-base-x86_64.iso \
+            -o kenosis-base-x86_64.iso \
             -b boot/syslinux/isolinux.bin \
             -c boot/syslinux/boot.cat \
             -no-emul-boot -boot-load-size 4 -boot-info-table \
@@ -138,7 +140,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kenosis-base-x86_64.iso
-          path: /kenosis-base-x86_64.iso
+          path: kenosis-base-x86_64.iso
 
       - name: Automated Boot Test (QEMU)
         run: |
@@ -147,7 +149,7 @@ jobs:
           cat << 'EOF' > test-boot.exp
           #!/usr/bin/expect -f
           set timeout 60
-          spawn qemu-system-x86_64 -m 512M -cdrom /kenosis-base-x86_64.iso -nographic -boot d -serial stdio
+          spawn qemu-system-x86_64 -m 512M -cdrom kenosis-base-x86_64.iso -nographic -boot d -serial stdio
           expect {
               "sinit is init" {
                   puts "\nSUCCESS: Kernel booted and sinit took over PID 1"

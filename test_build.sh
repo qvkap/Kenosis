@@ -14,6 +14,8 @@ docker run --rm -v "$(pwd)/repo:/repo" -w /build alpine:3.20 sh -c '
     export KISS_ROOT="/"
     export KISS_PATH="/repo"
     export KISS_PROMPT=0
+    export LOGNAME=root
+    export USER=root
 
     # Bootstrap qbe and cproc to use as compiler
     kiss build qbe
