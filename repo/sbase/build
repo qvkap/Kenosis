@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+make CC="${CC:-cc}" LDFLAGS="-static" sbase-box
+make CC="${CC:-cc}" PREFIX=/usr DESTDIR="$1" sbase-box-install

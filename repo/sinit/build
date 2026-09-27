@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+make CC="${CC:-cc}" LDFLAGS="-static"
+make CC="${CC:-cc}" PREFIX=/usr DESTDIR="$1" install
