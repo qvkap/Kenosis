@@ -6,11 +6,17 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
   build-packages:
     runs-on: ubuntu-latest
     container:
       image: alpine:3.20
+      env:
+        LOGNAME: root
+        USER: root
 
     steps:
       - uses: actions/checkout@v3
@@ -25,8 +31,6 @@ jobs:
           echo "KISS_ROOT=/" >> $GITHUB_ENV
           echo "KISS_PATH=$PWD/repo" >> $GITHUB_ENV
           echo "KISS_PROMPT=0" >> $GITHUB_ENV
-          echo "LOGNAME=root" >> $GITHUB_ENV
-          echo "USER=root" >> $GITHUB_ENV
 
       - name: Bootstrap QBE
         run: |
@@ -130,17 +134,32 @@ jobs:
           cp /usr/share/syslinux/ldlinux.c32 /iso/boot/syslinux/
 
           xorriso -as mkisofs \
-            -o kenosis-base-x86_64.iso \
+            -o $GITHUB_WORKSPACE/kenosis-base-x86_64.iso \
             -b boot/syslinux/isolinux.bin \
             -c boot/syslinux/boot.cat \
             -no-emul-boot -boot-load-size 4 -boot-info-table \
             /iso
+
+          cd $GITHUB_WORKSPACE
 
       - name: Upload ISO Artifact
         uses: actions/upload-artifact@v4
         with:
           name: kenosis-base-x86_64.iso
           path: kenosis-base-x86_64.iso
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: rolling
+          name: Kenosis Linux - Rolling Release
+          files: kenosis-base-x86_64.iso
+          body: |
+            Automated build of the Kenosis Linux operating system.
+            - **Architecture:** x86_64
+            - **Init:** sinit
+            - **Shell:** yash
 
       - name: Automated Boot Test (QEMU)
         run: |
