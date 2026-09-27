@@ -1,8 +1,7 @@
 #!/bin/sh -e
 
 ./configure \
-    --prefix=/usr \
-    --target=x86_64-linux-musl
+    --prefix=/usr
 
 make
 make DESTDIR="$1" install
