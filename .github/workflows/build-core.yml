@@ -26,7 +26,7 @@ jobs:
 
       - name: Setup KISS Package Manager
         run: |
-          git clone https://github.com/kiss-community/kiss /kiss
+          git clone --branch 5.5.0 https://github.com/kiss-community/kiss /kiss
           echo "PATH=/kiss:$PATH" >> $GITHUB_ENV
           echo "KISS_ROOT=/" >> $GITHUB_ENV
           echo "KISS_PATH=$PWD/repo" >> $GITHUB_ENV

@@ -9,7 +9,7 @@ docker run --rm -v "$(pwd)/repo:/repo" -w /build alpine:3.20 sh -c '
     apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz
 
     # Setup KISS
-    git clone https://github.com/kiss-community/kiss /kiss
+    git clone --branch 5.5.0 https://github.com/kiss-community/kiss /kiss
     export PATH="/kiss:$PATH"
     export KISS_ROOT="/"
     export KISS_PATH="/repo"
