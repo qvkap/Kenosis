@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Base Build Dependencies
-        run: apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz ncurses-dev ncurses-static rsync bison yacc
+        run: apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz ncurses-dev ncurses-static rsync bison byacc
 
       - name: Setup KISS Package Manager
         run: |

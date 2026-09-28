@@ -2,7 +2,7 @@
 
 sed -i 's/^CC = .*/CC = cproc/' config.mk
 sed -i 's/^LDFLAGS = .*/LDFLAGS = -static/' config.mk
-sed -i 's/^YACC = .*/YACC = yacc/' config.mk
+sed -i 's/^YACC = .*/YACC = byacc/' config.mk
 
 make ubase-box
 make PREFIX=/usr DESTDIR="$1" ubase-box-install
