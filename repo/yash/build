@@ -1,7 +1,9 @@
 #!/bin/sh -e
 
 LDFLAGS="-static" ./configure \
-    --prefix=/usr
+    --prefix=/usr \
+    --disable-nls \
+    --disable-socket
 
-make CC="${CC:-cc}"
-make CC="${CC:-cc}" DESTDIR="$1" install
+make
+make DESTDIR="$1" install

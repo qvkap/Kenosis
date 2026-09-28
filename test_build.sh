@@ -6,10 +6,11 @@ docker run --rm -v "$(pwd)/repo:/repo" -w /build alpine:3.20 sh -c '
     set -e
 
     # Install host build dependencies
-    apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz
+    apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz rsync
 
     # Setup KISS
-    git clone https://github.com/kiss-community/kiss /kiss
+    git clone -b 5.5.0 https://github.com/kiss-community/kiss /kiss
+    export KISS_HASH=sha256
     export PATH="/kiss:$PATH"
     export KISS_ROOT="/"
     export KISS_PATH="/repo"
@@ -22,11 +23,14 @@ docker run --rm -v "$(pwd)/repo:/repo" -w /build alpine:3.20 sh -c '
     kiss build cproc
     kiss install cproc
 
+    kiss build musl
+    kiss install musl
+    kiss build linux-headers
+    kiss install linux-headers
+
     # Now use cproc for the rest of the packages
     export CC=cproc
 
-    kiss build musl
-    kiss build linux-headers
     kiss build sbase
     kiss build ubase
     kiss build sinit

@@ -1,4 +1,7 @@
 #!/bin/sh -e
 
-make CC="${CC:-cc}" LDFLAGS="-static" ubase-box
-make CC="${CC:-cc}" PREFIX=/usr DESTDIR="$1" ubase-box-install
+sed -i 's/^CC = .*/CC = cproc/' config.mk
+sed -i 's/^LDFLAGS = .*/LDFLAGS = -static/' config.mk
+
+make ubase-box
+make PREFIX=/usr DESTDIR="$1" ubase-box-install
