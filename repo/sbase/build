@@ -4,5 +4,12 @@ sed -i 's/^CC = .*/CC = cproc/' config.mk
 sed -i 's/^LDFLAGS = .*/LDFLAGS = -static/' config.mk
 sed -i 's/^YACC = .*/YACC = byacc/' config.mk
 
+# The make utility in sbase uses volatile variables, which cproc does not currently support.
+# Since kiss uses the host make anyway, we can safely exclude make from the sbase build.
+sed -i 's/make\\//g' Makefile
+sed -i 's/make.c//g' Makefile
+sed -i '/make\/main.o:/d' Makefile
+sed -i '/make\/defaults.o:/d' Makefile
+
 make sbase-box
 make PREFIX=/usr DESTDIR="$1" sbase-box-install
