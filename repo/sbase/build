@@ -1,4 +1,8 @@
 #!/bin/sh -e
 
-make CC="${CC:-cc}" LDFLAGS="-static" sbase-box
-make CC="${CC:-cc}" PREFIX=/usr DESTDIR="$1" sbase-box-install
+sed -i 's/^CC = .*/CC = cproc/' config.mk
+sed -i 's/^LDFLAGS = .*/LDFLAGS = -static/' config.mk
+sed -i 's/^YACC = .*/YACC = byacc/' config.mk
+
+make sbase-box
+make PREFIX=/usr DESTDIR="$1" sbase-box-install

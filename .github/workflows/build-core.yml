@@ -19,14 +19,15 @@ jobs:
         USER: root
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Base Build Dependencies
-        run: apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz ncurses-dev ncurses-static
+        run: apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz ncurses-dev ncurses-static rsync byacc
 
       - name: Setup KISS Package Manager
         run: |
-          git clone https://github.com/kiss-community/kiss /kiss
+          git clone -b 5.5.0 https://github.com/kiss-community/kiss /kiss
+          echo "KISS_HASH=sha256" >> $GITHUB_ENV
           echo "PATH=/kiss:$PATH" >> $GITHUB_ENV
           echo "KISS_ROOT=/" >> $GITHUB_ENV
           echo "KISS_PATH=$PWD/repo" >> $GITHUB_ENV
@@ -100,47 +101,7 @@ jobs:
           ln -s /usr/bin/yash /mnt/rootfs/bin/sh
 
       - name: Compile Monolithic Kernel & Generate ISO
-        run: |
-          apk add --no-cache syslinux xorriso mtools ncurses-dev flex bison elfutils-dev openssl-dev
-          curl -sL https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.10.3.tar.xz | tar -xJ
-          cd linux-6.10.3
-
-          # Unset CC so kernel compilation uses GCC, not cproc
-          unset CC
-
-          make defconfig
-          # Disable loadable modules & DRM for Kenosis
-          sed -i 's/CONFIG_MODULES=y/# CONFIG_MODULES is not set/' .config
-          sed -i 's/CONFIG_DRM=y/# CONFIG_DRM is not set/' .config
-          make olddefconfig
-          make -j$(nproc) bzImage
-
-          # Setup ISO structure
-          mkdir -p /iso/boot/syslinux
-          cp arch/x86/boot/bzImage /iso/boot/vmlinuz
-
-          # Initramfs
-          cd /mnt/rootfs
-          find . | cpio -o -H newc | gzip -9 > /iso/boot/initramfs.igz
-
-          # Syslinux configuration
-          echo "DEFAULT kenosis" > /iso/boot/syslinux/syslinux.cfg
-          echo "LABEL kenosis" >> /iso/boot/syslinux/syslinux.cfg
-          echo "  LINUX /boot/vmlinuz" >> /iso/boot/syslinux/syslinux.cfg
-          echo "  INITRD /boot/initramfs.igz" >> /iso/boot/syslinux/syslinux.cfg
-          echo "  APPEND root=/dev/ram0 console=ttyS0 quiet" >> /iso/boot/syslinux/syslinux.cfg
-
-          cp /usr/share/syslinux/isolinux.bin /iso/boot/syslinux/
-          cp /usr/share/syslinux/ldlinux.c32 /iso/boot/syslinux/
-
-          xorriso -as mkisofs \
-            -o $GITHUB_WORKSPACE/kenosis-base-x86_64.iso \
-            -b boot/syslinux/isolinux.bin \
-            -c boot/syslinux/boot.cat \
-            -no-emul-boot -boot-load-size 4 -boot-info-table \
-            /iso
-
-          cd $GITHUB_WORKSPACE
+        run: ./build_iso.sh
 
       - name: Upload ISO Artifact
         uses: actions/upload-artifact@v4
@@ -165,20 +126,29 @@ jobs:
         run: |
           apk add --no-cache qemu-system-x86_64 qemu-ui-curses expect
 
-          cat << 'EOF' > test-boot.exp
+          cat << 'EXP' > test-boot.exp
           #!/usr/bin/expect -f
           set timeout 60
           spawn qemu-system-x86_64 -m 512M -cdrom kenosis-base-x86_64.iso -nographic -boot d -serial stdio
           expect {
               "sinit is init" {
-                  puts "\nSUCCESS: Kernel booted and sinit took over PID 1"
-                  exit 0
+                  send "echo YASH_IS_ALIVE\r"
+                  expect {
+                      "YASH_IS_ALIVE" {
+                          puts "\nSUCCESS: yash shell launched"
+                          exit 0
+                      }
+                      timeout {
+                          puts "\nERROR: yash shell verification timeout"
+                          exit 1
+                      }
+                  }
               }
               timeout {
                   puts "\nERROR: Boot timeout"
                   exit 1
               }
           }
-          EOF
+          EXP
           chmod +x test-boot.exp
           ./test-boot.exp

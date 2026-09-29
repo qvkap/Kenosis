@@ -5,5 +5,5 @@
 
 sed -i 's/LDFLAGS  =/LDFLAGS  = -static/' config.mk
 
-make CC="${CC:-cc}"
-make CC="${CC:-cc}" DESTDIR="$1" install
+make CC="cproc"
+make CC="cproc" DESTDIR="$1" install
