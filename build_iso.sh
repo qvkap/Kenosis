@@ -1,6 +1,6 @@
 #!/bin/sh -e
 apk add --no-cache syslinux xorriso mtools ncurses-dev flex bison elfutils-dev openssl-dev
-curl -sL https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.10.3.tar.xz | tar -xJ
+curl -sL https://mirrors.kernel.org/pub/linux/kernel/v6.x/linux-6.10.3.tar.xz | tar -xJ
 cd linux-6.10.3
 
 unset CC
