@@ -1,154 +1,140 @@
-name: Build Core OS & ISO
+name: Build Core OS and ISO
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "*" ]
   pull_request:
     branches: [ "main" ]
 
-permissions:
-  contents: write
-
 jobs:
-  build-packages:
+  build:
     runs-on: ubuntu-latest
-    container:
-      image: alpine:3.20
-      env:
-        LOGNAME: root
-        USER: root
+    permissions:
+      contents: write
+    container: alpine:3.20
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install Base Build Dependencies
-        run: apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz ncurses-dev ncurses-static rsync byacc
+      - name: Install dependencies
+        run: |
+          apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz rsync syslinux xorriso mtools ncurses-dev flex bison elfutils-dev openssl-dev qemu-system-x86_64 qemu-ui-curses expect
 
       - name: Setup KISS Package Manager
         run: |
           git clone -b 5.5.0 https://github.com/kiss-community/kiss /kiss
+          echo "/kiss" >> $GITHUB_PATH
           echo "KISS_HASH=sha256" >> $GITHUB_ENV
-          echo "PATH=/kiss:$PATH" >> $GITHUB_ENV
           echo "KISS_ROOT=/" >> $GITHUB_ENV
-          echo "KISS_PATH=$PWD/repo" >> $GITHUB_ENV
+          echo "KISS_PATH=$GITHUB_WORKSPACE/repo" >> $GITHUB_ENV
           echo "KISS_PROMPT=0" >> $GITHUB_ENV
+          echo "LOGNAME=root" >> $GITHUB_ENV
+          echo "USER=root" >> $GITHUB_ENV
 
-      - name: Bootstrap QBE
+      - name: Build Toolchain
         run: |
           kiss build qbe
           kiss install qbe
 
-      - name: Bootstrap cproc
-        run: |
           kiss build cproc
           kiss install cproc
 
-      - name: Build musl & linux-headers (with GCC)
+          kiss build musl
+          kiss install musl
+
+          kiss build linux-headers
+          kiss install linux-headers
+
+      - name: Build Userland Packages with cproc
         run: |
-          kiss build musl && kiss install musl
-          kiss build linux-headers && kiss install linux-headers
+          export CC=cproc
+          export PATH="/usr/bin:/usr/local/bin:$PATH"
 
-      - name: Set CC to cproc for system packages
-        run: echo "CC=cproc" >> $GITHUB_ENV
+          kiss build sbase
+          kiss build ubase
+          kiss build sinit
+          kiss build daemontools-encore
+          kiss build yash
+          kiss build vis
+          kiss build dvtm
+          kiss build abduco
 
-      - name: Build Core Utilities (sbase, ubase, sinit, daemontools-encore)
+      - name: Assemble target rootfs
         run: |
-          kiss build sbase && kiss install sbase
-          kiss build ubase && kiss install ubase
-          kiss build sinit && kiss install sinit
-          kiss build daemontools-encore && kiss install daemontools-encore
+          mkdir -p /mnt/rootfs
+          export KISS_ROOT=/mnt/rootfs
 
-      - name: Build User Environment (yash, vis, dvtm, abduco)
-        run: |
-          kiss build yash && kiss install yash
-          kiss build vis && kiss install vis
-          kiss build dvtm && kiss install dvtm
-          kiss build abduco && kiss install abduco
+          kiss install sbase
+          kiss install ubase
+          kiss install sinit
+          kiss install daemontools-encore
+          kiss install yash
+          kiss install vis
+          kiss install dvtm
+          kiss install abduco
 
-      - name: Assemble RootFS
-        run: |
-          mkdir -p /mnt/rootfs/bin /mnt/rootfs/sbin /mnt/rootfs/dev /mnt/rootfs/proc /mnt/rootfs/sys /mnt/rootfs/tmp /mnt/rootfs/var /mnt/rootfs/etc /mnt/rootfs/usr/bin /mnt/rootfs/usr/sbin /mnt/rootfs/usr/lib /mnt/rootfs/lib
+          # Initialize standard layout inside rootfs
+          mkdir -p /mnt/rootfs/bin /mnt/rootfs/etc /mnt/rootfs/dev /mnt/rootfs/sys /mnt/rootfs/proc /mnt/rootfs/tmp /mnt/rootfs/var
 
-          # Since packages are installed directly to the Alpine container's root,
-          # we need to copy them from the system directories to our initramfs root.
-          # To avoid copying Alpine's base utilities, we explicitly copy what we built.
+          # Setup sinit specific files
+          ln -s /usr/bin/sinit /mnt/rootfs/init
 
-          # Core utilities (sbase, ubase, daemontools-encore, yash, vis, dvtm, abduco)
-          cp -a /usr/bin/sinit /mnt/rootfs/usr/bin/ 2>/dev/null || true
-          cp -a /usr/bin/yash /mnt/rootfs/usr/bin/ 2>/dev/null || true
-          cp -a /usr/bin/vis /mnt/rootfs/usr/bin/ 2>/dev/null || true
-          cp -a /usr/bin/dvtm /mnt/rootfs/usr/bin/ 2>/dev/null || true
-          cp -a /usr/bin/abduco /mnt/rootfs/usr/bin/ 2>/dev/null || true
-
-          # Copy all sbase and ubase binaries (they are usually in /usr/bin)
-          # We'll rely on the tarballs created by kiss build to extract exactly what we need
-          for pkg in musl sbase ubase sinit daemontools-encore yash vis dvtm abduco; do
-            # Find the built tarball
-            tarball=$(find ~/.cache/kiss/bin -name "$pkg-*.tar.gz" | head -n 1)
-            if [ -n "$tarball" ]; then
-              tar -xzf "$tarball" -C /mnt/rootfs/
-            fi
-          done
-
-          # Minimal configuration
-          echo '#!/usr/bin/yash' > /mnt/rootfs/bin/rc.init
-          echo 'echo "sinit is init"' >> /mnt/rootfs/bin/rc.init
-          echo 'exec /usr/bin/yash' >> /mnt/rootfs/bin/rc.init
+          cat << 'RCINIT' > /mnt/rootfs/bin/rc.init
+          #!/bin/sh
+          export PATH=/bin:/usr/bin:/usr/local/bin
+          mount -t proc proc /proc
+          mount -t sysfs sys /sys
+          mount -t devtmpfs dev /dev
+          echo "Starting Kenosis shell..."
+          exec yash
+          RCINIT
           chmod +x /mnt/rootfs/bin/rc.init
 
-          # Crucial symlinks for kernel boot
-          ln -s /usr/bin/sinit /mnt/rootfs/init
-          ln -s /usr/bin/yash /mnt/rootfs/bin/sh
+          cat << 'RCSHUTDOWN' > /mnt/rootfs/bin/rc.shutdown
+          #!/bin/sh
+          echo "Shutting down..."
+          RCSHUTDOWN
+          chmod +x /mnt/rootfs/bin/rc.shutdown
 
-      - name: Compile Monolithic Kernel & Generate ISO
-        run: ./build_iso.sh
+      - name: Compile Kernel and Generate ISO
+        run: |
+          chmod +x ./build_iso.sh
+          ./build_iso.sh
+
+      - name: Test ISO in QEMU
+        run: |
+          cat << 'EXPECT_SCRIPT' > test_boot.exp
+          #!/usr/bin/expect -f
+          set timeout 60
+          spawn qemu-system-x86_64 -m 512M -cdrom kenosis-base-x86_64.iso -nographic -no-reboot
+
+          expect {
+            "Starting Kenosis shell" {
+              puts "SUCCESS: rc.init ran!"
+            }
+            timeout {
+              puts "ERROR: Boot timeout!"
+              exec bash -c "exit 1"
+            }
+          }
+
+          send "echo IT_WORKS\r"
+          expect {
+            "IT_WORKS" {
+              puts "SUCCESS: Yash shell is interactive!"
+            }
+            timeout {
+              puts "ERROR: Yash shell did not respond!"
+              exec bash -c "exit 1"
+            }
+          }
+          EXPECT_SCRIPT
+          chmod +x test_boot.exp
+          ./test_boot.exp
 
       - name: Upload ISO Artifact
         uses: actions/upload-artifact@v4
         with:
           name: kenosis-base-x86_64.iso
           path: kenosis-base-x86_64.iso
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
-        with:
-          tag_name: rolling
-          name: Kenosis Linux - Rolling Release
-          files: kenosis-base-x86_64.iso
-          body: |
-            Automated build of the Kenosis Linux operating system.
-            - **Architecture:** x86_64
-            - **Init:** sinit
-            - **Shell:** yash
-
-      - name: Automated Boot Test (QEMU)
-        run: |
-          apk add --no-cache qemu-system-x86_64 qemu-ui-curses expect
-
-          cat << 'EXP' > test-boot.exp
-          #!/usr/bin/expect -f
-          set timeout 60
-          spawn qemu-system-x86_64 -m 512M -cdrom kenosis-base-x86_64.iso -nographic -boot d -serial stdio
-          expect {
-              "sinit is init" {
-                  send "echo YASH_IS_ALIVE\r"
-                  expect {
-                      "YASH_IS_ALIVE" {
-                          puts "\nSUCCESS: yash shell launched"
-                          exit 0
-                      }
-                      timeout {
-                          puts "\nERROR: yash shell verification timeout"
-                          exit 1
-                      }
-                  }
-              }
-              timeout {
-                  puts "\nERROR: Boot timeout"
-                  exit 1
-              }
-          }
-          EXP
-          chmod +x test-boot.exp
-          ./test-boot.exp
