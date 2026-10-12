@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
-sed -i 's/^CC = .*/CC = cproc/' config.mk
-sed -i 's/^LDFLAGS = .*/LDFLAGS = -static/' config.mk
+echo "CC = cproc" >> config.mk
+echo "LDFLAGS = -static" >> config.mk
 sed -i 's/^YACC = .*/YACC = byacc/' config.mk
 
 make ubase-box
