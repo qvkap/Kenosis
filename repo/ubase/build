@@ -5,7 +5,7 @@ echo "LDFLAGS = -static" >> config.mk
 sed -i 's/^YACC = .*/YACC = byacc/' config.mk
 
 # Workaround for cproc lack of volatile store support
-find . -name "*.[ch]" -exec sed -i 's/volatile //g' {} + || true
+for f in $(find . -name "*.[ch]"); do sed -i 's/volatile //g' "$f"; done || true
 
 make ubase-box
 make PREFIX=/usr DESTDIR="$1" ubase-box-install
