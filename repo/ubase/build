@@ -4,5 +4,8 @@ echo "CC = cproc" >> config.mk
 echo "LDFLAGS = -static" >> config.mk
 sed -i 's/^YACC = .*/YACC = byacc/' config.mk
 
+# Workaround for cproc lack of volatile store support
+[ -f libutil/explicit_bzero.c ] && sed -i 's/\(\*volatile\)/\(\*\)/g' libutil/explicit_bzero.c || true
+
 make ubase-box
 make PREFIX=/usr DESTDIR="$1" ubase-box-install

@@ -4,5 +4,8 @@ echo "CC = cproc" >> config.mk
 echo "LDFLAGS = -static" >> config.mk
 sed -i 's/^YACC = .*/YACC = byacc/' config.mk
 
+# Workaround for cproc lack of volatile store support
+[ -f make/main.c ] && sed -i 's/volatile sig_atomic_t/sig_atomic_t/g' make/main.c || true
+
 make sbase-box
 make PREFIX=/usr DESTDIR="$1" sbase-box-install
