@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-sed -i 's/LDFLAGS  =/LDFLAGS  = -static/' config.mk
+echo "LDFLAGS = -static" >> config.mk
 
 make CC="cproc"
 make CC="cproc" PREFIX=/usr DESTDIR="$1" install

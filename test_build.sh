@@ -6,7 +6,7 @@ docker run --rm -v "$(pwd)/repo:/repo" -w /build alpine:3.20 sh -c '
     set -e
 
     # Install host build dependencies
-    apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz rsync
+    apk add --no-cache git make gcc musl-dev perl curl ca-certificates xz rsync byacc
 
     # Setup KISS
     git clone -b 5.5.0 https://github.com/kiss-community/kiss /kiss
