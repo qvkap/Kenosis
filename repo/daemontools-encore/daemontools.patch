@@ -1,0 +1,210 @@
+diff -urN orig/buffer_0.c patched/buffer_0.c
+--- orig/buffer_0.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/buffer_0.c	2026-10-14 22:17:46.699352827 +0000
+@@ -2,7 +2,7 @@
+
+ #include "buffer.h"
+
+-int buffer_0_read(fd,buf,len) int fd; char *buf; int len;
++int buffer_0_read(int fd, char *buf, int len)
+ {
+   if (buffer_flush(buffer_1) == -1) return -1;
+   return buffer_unixread(fd,buf,len);
+diff -urN orig/chkshsgr.c patched/chkshsgr.c
+--- orig/chkshsgr.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/chkshsgr.c	2026-10-14 22:17:46.711352827 +0000
+@@ -4,7 +4,7 @@
+ #include <grp.h>
+ #include <unistd.h>
+
+-int main()
++int main(void)
+ {
+   short x[4];
+
+diff -urN orig/setuser.c patched/setuser.c
+--- orig/setuser.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/setuser.c	2026-10-14 22:17:46.715352827 +0000
+@@ -9,12 +9,12 @@
+
+ #define FATAL "setuser: fatal: "
+
+-static void usage()
++static void usage(void)
+ {
+   strerr_die1x(100,"setuser: usage: setuser account child");
+ }
+
+-static void nomem()
++static void nomem(void)
+ {
+   strerr_die2x(111,FATAL,"out of memory");
+ }
+diff -urN orig/tai64n.c patched/tai64n.c
+--- orig/tai64n.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/tai64n.c	2026-10-14 22:17:46.703352827 +0000
+@@ -27,7 +27,7 @@
+
+ char stamp[TIMESTAMP + 1];
+
+-int main()
++int main(void)
+ {
+   int len;
+
+diff -urN orig/tai64nlocal.c patched/tai64nlocal.c
+--- orig/tai64nlocal.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/tai64nlocal.c	2026-10-14 22:17:46.699352827 +0000
+@@ -28,7 +28,7 @@
+ unsigned long u;
+ struct tm *t;
+
+-int main()
++int main(void)
+ {
+   char ch;
+   int i;
+diff -urN orig/trycpp.c patched/trycpp.c
+--- orig/trycpp.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/trycpp.c	2026-10-14 22:17:46.699352827 +0000
+@@ -1,6 +1,6 @@
+ /* Public domain. */
+
+-int main()
++int main(void)
+ {
+ #ifdef NeXT
+   printf("nextstep\n"); exit(0);
+diff -urN orig/trydrent.c patched/trydrent.c
+--- orig/trydrent.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/trydrent.c	2026-10-14 22:17:46.703352827 +0000
+@@ -3,7 +3,7 @@
+ #include <sys/types.h>
+ #include <dirent.h>
+
+-void foo()
++void foo(void)
+ {
+   DIR *dir;
+   struct dirent *d;
+diff -urN orig/trymemrchr.c patched/trymemrchr.c
+--- orig/trymemrchr.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/trymemrchr.c	2026-10-14 22:17:46.711352827 +0000
+@@ -3,7 +3,7 @@
+ #define _GNU_SOURCE
+ #include <string.h>
+
+-int main()
++int main(void)
+ {
+   char try[1];
+   memrchr(try,1,1);
+diff -urN orig/trymkffo.c patched/trymkffo.c
+--- orig/trymkffo.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/trymkffo.c	2026-10-14 22:17:46.703352827 +0000
+@@ -3,7 +3,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+
+-void main()
++void main(void)
+ {
+   mkfifo("temp-trymkffo",0);
+ }
+diff -urN orig/trypoll.c patched/trypoll.c
+--- orig/trypoll.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/trypoll.c	2026-10-14 22:17:46.699352827 +0000
+@@ -4,7 +4,7 @@
+ #include <fcntl.h>
+ #include <poll.h>
+
+-int main()
++int main(void)
+ {
+   struct pollfd x;
+
+diff -urN orig/tryshsgr.c patched/tryshsgr.c
+--- orig/tryshsgr.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/tryshsgr.c	2026-10-14 22:17:46.695352827 +0000
+@@ -1,6 +1,6 @@
+ /* Public domain. */
+
+-int main()
++int main(void)
+ {
+   short x[4];
+
+diff -urN orig/trysysel.c patched/trysysel.c
+--- orig/trysysel.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/trysysel.c	2026-10-14 22:17:46.703352827 +0000
+@@ -5,7 +5,7 @@
+ #include <sys/time.h>
+ #include <sys/select.h> /* SVR4 silliness */
+
+-void foo()
++void foo(void)
+ {
+   ;
+ }
+diff -urN orig/tryulong64.c patched/tryulong64.c
+--- orig/tryulong64.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/tryulong64.c	2026-10-14 22:17:46.703352827 +0000
+@@ -1,6 +1,6 @@
+ /* Public domain. */
+
+-int main()
++int main(void)
+ {
+   unsigned long u;
+   u = 1;
+diff -urN orig/wait_nohang.c patched/wait_nohang.c
+--- orig/wait_nohang.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/wait_nohang.c	2026-10-14 22:17:46.711352827 +0000
+@@ -4,7 +4,7 @@
+ #include <sys/wait.h>
+ #include "haswaitp.h"
+
+-int wait_nohang(wstat) int *wstat;
++int wait_nohang(int *wstat)
+ {
+ #ifdef HASWAITPID
+   return waitpid(-1,wstat,WNOHANG);
+diff -urN orig/wait_pid.c patched/wait_pid.c
+--- orig/wait_pid.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/wait_pid.c	2026-10-14 22:17:46.695352827 +0000
+@@ -7,7 +7,7 @@
+
+ #ifdef HASWAITPID
+
+-int wait_pid(wstat,pid) int *wstat; int pid;
++int wait_pid(int *wstat, int pid)
+ {
+   int r;
+
+@@ -24,7 +24,7 @@
+ static int oldpid = 0;
+ static int oldwstat; /* defined if(oldpid) */
+
+-int wait_pid(wstat,pid) int *wstat; int pid;
++int wait_pid(int *wstat, int pid)
+ {
+   int r;
+
+diff -urN orig/x86cpuid.c patched/x86cpuid.c
+--- orig/x86cpuid.c	2018-10-14 00:48:50.000000000 +0000
++++ patched/x86cpuid.c	2026-10-14 22:17:46.707352827 +0000
+@@ -2,12 +2,12 @@
+
+ #include <signal.h>
+
+-void nope()
++void nope(void)
+ {
+   exit(1);
+ }
+
+-int main()
++int main(void)
+ {
+   unsigned long x[4];
+   unsigned long y[4];
