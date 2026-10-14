@@ -2,7 +2,7 @@
 
 echo "Building Kenosis packages in isolated Docker container..."
 
-docker run --rm -v "$(pwd)/repo:/repo" -w /build alpine:3.20 sh -c '
+docker run -v "$(pwd)/repo:/repo" -w /build alpine:3.20 sh -c '
     set -e
 
     # Install host build dependencies
