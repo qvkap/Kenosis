@@ -3,5 +3,7 @@
 echo "CC = cproc" >> config.mk
 echo "LDFLAGS = -static" >> config.mk
 
+cp config.def.h config.h
+
 make
 make PREFIX=/usr DESTDIR="$1" install
