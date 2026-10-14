@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-patch -p1 < daemontools.patch
+patch -p1 < ../daemontools.patch
 
 echo "cproc -O2 -static" > conf-cc
 echo "cproc -s -static" > conf-ld
