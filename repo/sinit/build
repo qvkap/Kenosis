@@ -1,7 +1,9 @@
 #!/bin/sh -e
 
-sed -i 's/^CC = .*/CC = cproc/' config.mk
-sed -i 's/^LDFLAGS = .*/LDFLAGS = -static/' config.mk
+echo "CC = cproc" >> config.mk
+echo "LDFLAGS = -static" >> config.mk
+
+cp config.def.h config.h
 
 make
 make PREFIX=/usr DESTDIR="$1" install
