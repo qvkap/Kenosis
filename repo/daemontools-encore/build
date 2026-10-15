@@ -3,8 +3,8 @@
 echo "gcc -O2 -static" > conf-cc
 echo "gcc -s -static" > conf-ld
 
-# Replace sbase-incompatible 'head -n 1' with 'sed 1q'
-sed -i 's/head -n 1/sed 1q/g' Makefile || true
+# Replace sbase-incompatible 'head -n 1' with 'sed -n 1p'
+sed -i 's/head -n 1/sed -n 1p/g' Makefile || true
 
 # Replace sbase-incompatible 'cat -v' with 'cat'
 sed -i 's/cat -v/cat/g' Makefile || true
