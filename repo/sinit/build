@@ -1,7 +1,10 @@
 #!/bin/sh -e
 
-sed -i 's/^CC = .*/CC = cproc/' config.mk
-sed -i 's/^LDFLAGS = .*/LDFLAGS = -static/' config.mk
+cp config.def.h config.h
+for f in $(find . -name "*.[ch]"); do sed 's/volatile //g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
+
+echo "CC = cproc" >> config.mk
+echo "LDFLAGS = -static" >> config.mk
 
 make
 make PREFIX=/usr DESTDIR="$1" install
