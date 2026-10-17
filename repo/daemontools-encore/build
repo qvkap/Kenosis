@@ -1,6 +1,10 @@
 #!/bin/sh -e
 
+# Strip volatile from all C files, similar to suckless utils
 for f in $(find . -name "*.[ch]"); do sed 's/volatile //g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
+
+# Remove the word 'register' as well since cproc doesn't like it in parameters
+for f in $(find . -name "*.[ch]"); do sed 's/\bregister //g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
 
 echo "cproc -O2 -static" > conf-cc
 echo "cproc -s -static" > conf-ld
