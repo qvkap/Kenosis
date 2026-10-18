@@ -10,8 +10,11 @@ sed 's/int buffer_2_read(fd,buf,len) int fd; char \*buf; int len;/int buffer_2_r
 sed 's/int wait_nohang(wstat) int \*wstat;/int wait_nohang(int *wstat)/' wait_nohang.c > wait_nohang.c.tmp && mv wait_nohang.c.tmp wait_nohang.c || true
 sed 's/int wait_pid(wstat,pid) int \*wstat; int pid;/int wait_pid(int *wstat, int pid)/' wait_pid.c > wait_pid.c.tmp && mv wait_pid.c.tmp wait_pid.c || true
 
+sed 's/static int oneread(int (\*op)(),int fd,char \*buf,unsigned int len)/static int oneread(int (*op)(int, char *, int),int fd,char *buf,unsigned int len)/' buffer_get.c > buffer_get.c.tmp && mv buffer_get.c.tmp buffer_get.c || true
+sed 's/static int onewrite(int (\*op)(),int fd,const char \*buf,unsigned int len)/static int onewrite(int (*op)(int, const char *, int),int fd,const char *buf,unsigned int len)/' buffer_put.c > buffer_put.c.tmp && mv buffer_put.c.tmp buffer_put.c || true
+
 # cproc strictly checks pointer assignments, so we must explicitly cast function pointers in BUFFER_INIT
-for f in buffer.h; do sed 's/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (op) }/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (int (*)())(op) }/' "$f" > "$f.tmp" && mv "$f.tmp" "$f" || true; done
+for f in buffer.h; do sed 's/int (\*op)();/int (*op)(int, char *, int);/' "$f" > "$f.tmp" && mv "$f.tmp" "$f" || true; done
 
 echo "cproc -O2 -static" > conf-cc
 echo "cproc -s -static" > conf-ld
