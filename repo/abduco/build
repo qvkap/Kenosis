@@ -3,7 +3,7 @@
 ./configure \
     --prefix=/usr
 
-sed -i 's/LDFLAGS  =/LDFLAGS  = -static/' config.mk
+sed 's/LDFLAGS  =/LDFLAGS  = -static/' config.mk > config.mk.tmp && mv config.mk.tmp config.mk
 
 make CC="cproc"
 make CC="cproc" DESTDIR="$1" install
