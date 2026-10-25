@@ -5,6 +5,7 @@ for f in $(find . -name "*.[ch]"); do sed 's/register //g' "$f" > "$f.tmp" && mv
 
 # K&R C syntax used in a few files causes cproc to fail. Replace them with proper ANSI C definitions.
 sed 's/int buffer_0_read(fd,buf,len) int fd; char \*buf; int len;/int buffer_0_read(int fd, char *buf, int len)/' buffer_0.c > buffer_0.c.tmp && mv buffer_0.c.tmp buffer_0.c || true
+sed 's/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (op) }/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (int (\*)())(op) }/' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h || true
 sed 's/int wait_nohang(wstat) int \*wstat;/int wait_nohang(int *wstat)/' wait_nohang.c > wait_nohang.c.tmp && mv wait_nohang.c.tmp wait_nohang.c || true
 sed 's/int wait_pid(wstat,pid) int \*wstat; int pid;/int wait_pid(int *wstat, int pid)/' wait_pid.c > wait_pid.c.tmp && mv wait_pid.c.tmp wait_pid.c || true
 
