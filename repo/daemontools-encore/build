@@ -20,11 +20,12 @@ sed 's/int fd; char \*buf; int len;//' buffer_1.c > buffer_1.c.tmp && mv buffer_
 sed 's/int fd; char \*buf; int len;//' buffer_2.c > buffer_2.c.tmp && mv buffer_2.c.tmp buffer_2.c 2>/dev/null || true
 sed 's/int wait_nohang(wstat) int \*wstat;/int wait_nohang(int *wstat)/' wait_nohang.c > wait_nohang.c.tmp && mv wait_nohang.c.tmp wait_nohang.c
 sed 's/int wait_pid(wstat,pid) int \*wstat; int pid;/int wait_pid(int *wstat, int pid)/' wait_pid.c > wait_pid.c.tmp && mv wait_pid.c.tmp wait_pid.c
+sed 's/void buffer_init(buffer \*s,int (\*op)(),int fd,char \*buf,unsigned int len)/void buffer_init(buffer \*s,int (\*op)(int, char \*, int),int fd,char \*buf,unsigned int len)/' buffer.c > buffer.c.tmp && mv buffer.c.tmp buffer.c
+sed 's/extern void buffer_init(buffer \*,int (\*)(),int,char \*,unsigned int);/extern void buffer_init(buffer \*,int (\*)(int, char \*, int),int,char \*,unsigned int);/' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h
+sed 's/int (\*op)();/int (\*op)(int, char \*, int);/' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h
 
 # Buffer macro incompatibility
 sed 's/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (op) }/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (int (\*)(int, char \*, int))(op) }/' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h
-sed 's/int (\*op)();/int (\*op)(int, char \*, int);/' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h
-sed 's/extern void buffer_init(buffer \*,int (\*)(),int,char \*,unsigned int);/extern void buffer_init(buffer \*,int (\*)(int, char \*, int),int,char \*,unsigned int);/' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h
 
 make
 make DESTDIR="$1" install
