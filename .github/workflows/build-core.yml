@@ -65,7 +65,7 @@ jobs:
           kiss build dvtm && kiss install dvtm
           kiss build abduco && kiss install abduco
 
-      - name: Assemble RootFS
+      - name: Assemble RootFS for initramfs
         run: |
           mkdir -p /mnt/rootfs/bin /mnt/rootfs/sbin /mnt/rootfs/dev /mnt/rootfs/proc /mnt/rootfs/sys /mnt/rootfs/tmp /mnt/rootfs/var /mnt/rootfs/etc /mnt/rootfs/usr/bin /mnt/rootfs/usr/sbin /mnt/rootfs/usr/lib /mnt/rootfs/lib
 
