@@ -1,4 +1,5 @@
 name: Build Core OS & ISO
+# This workflow builds Kenosis Linux packages, assembles the rootfs, compiles the kernel, and generates an ISO image.
 
 on:
   push:
@@ -124,8 +125,10 @@ jobs:
 
       - name: Automated Boot Test (QEMU)
         run: |
+          # Install QEMU and expect for automated boot testing
           apk add --no-cache qemu-system-x86_64 qemu-ui-curses expect
 
+          # Verify sinit takes over PID 1 and launches yash shell
           cat << 'EXP' > test-boot.exp
           #!/usr/bin/expect -f
           set timeout 60
