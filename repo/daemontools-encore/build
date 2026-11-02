@@ -2,6 +2,8 @@
 
 for f in $(find . -name "*[ch]"); do sed 's/volatile //g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
 for f in $(find . -name "*[ch]"); do sed 's/register //g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
+for f in $(find . -name "*[ch]"); do sed 's/int (\*op)()/int (*op)(int, char *, int)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
+for f in $(find . -name "*[ch]"); do sed 's/int (\*)()/int (*)(int, char *, int)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
 
 # Some legacy djb code relies on old C qualifier semantics that cproc rejects.
 # Defining these macros to empty keeps the package buildable without touching every source file.
