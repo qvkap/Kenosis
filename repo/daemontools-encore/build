@@ -16,7 +16,7 @@ sed 's/int wait_nohang(wstat) int \*wstat;/int wait_nohang(int *wstat)/' wait_no
 sed 's/int wait_pid(wstat,pid) int \*wstat; int pid;/int wait_pid(int *wstat, int pid)/' wait_pid.c > wait_pid.c.tmp && mv wait_pid.c.tmp wait_pid.c || true
 
 # Fix incompatible function pointer assignment in BUFFER_INIT
-sed 's/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (op) }/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (int (*)())(op) }/' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h || true
+sed 's/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (op) }/#define BUFFER_INIT(op,fd,buf,len) { (buf), 0, (len), (fd), (int (*)(int, char *, int))(op) }/' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h || true
 
 make
 make DESTDIR="$1" install
