@@ -1,4 +1,5 @@
 name: Build Core OS & ISO
+# This workflow implements the CI/CD pipeline for Kenosis Linux
 
 on:
   push:
@@ -124,6 +125,7 @@ jobs:
 
       - name: Automated Boot Test (QEMU)
         run: |
+          # Automated Boot Test using QEMU
           apk add --no-cache qemu-system-x86_64 qemu-ui-curses expect
 
           cat << 'EXP' > test-boot.exp

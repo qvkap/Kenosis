@@ -6,8 +6,8 @@ cd linux-6.10.3
 unset CC
 
 make defconfig
-sed -i 's/CONFIG_MODULES=y/# CONFIG_MODULES is not set/' .config
-sed -i 's/CONFIG_DRM=y/# CONFIG_DRM is not set/' .config
+sed 's/CONFIG_MODULES=y/# CONFIG_MODULES is not set/' .config > .config.tmp && mv .config.tmp .config
+sed 's/CONFIG_DRM=y/# CONFIG_DRM is not set/' .config > .config.tmp && mv .config.tmp .config
 make olddefconfig
 make -j$(nproc) bzImage
 
