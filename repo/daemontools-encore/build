@@ -28,6 +28,9 @@ sed 's/extern void (\*sig_defaulthandler)();/extern void (*sig_defaulthandler)(i
 sed 's/extern void (\*sig_ignorehandler)();/extern void (*sig_ignorehandler)(int);/g' sig.h > sig.h.tmp && mv sig.h.tmp sig.h
 sed 's/extern void sig_catch(int,void (\*)());/extern void sig_catch(int,void (*)(int));/g' sig.h > sig.h.tmp && mv sig.h.tmp sig.h
 
+# Fix sig_catch definition
+sed 's/void sig_catch(int sig,void (\*f)())/void sig_catch(int sig,void (*f)(int))/g' sig_catch.c > sig_catch.c.tmp && mv sig_catch.c.tmp sig_catch.c
+
 # Fix implicit int returns in try files
 for f in $(find . -name "try*.c"); do sed 's/^main()/int main(void)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
 for f in $(find . -name "try*.c"); do sed 's/^int main()/int main(void)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
