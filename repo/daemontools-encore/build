@@ -28,5 +28,10 @@ sed 's/extern void (\*sig_defaulthandler)();/extern void (*sig_defaulthandler)(i
 sed 's/extern void (\*sig_ignorehandler)();/extern void (*sig_ignorehandler)(int);/g' sig.h > sig.h.tmp && mv sig.h.tmp sig.h
 sed 's/extern void sig_catch(int,void (\*)());/extern void sig_catch(int,void (*)(int));/g' sig.h > sig.h.tmp && mv sig.h.tmp sig.h
 
+# Fix implicit int returns in try files
+for f in $(find . -name "try*.c"); do sed 's/^main()/int main(void)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
+for f in $(find . -name "try*.c"); do sed 's/^int main()/int main(void)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
+for f in $(find . -name "try*.c"); do sed 's/^void main()/int main(void)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
+
 make
 make DESTDIR="$1" install
