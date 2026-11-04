@@ -132,6 +132,7 @@ jobs:
           spawn qemu-system-x86_64 -m 512M -cdrom kenosis-base-x86_64.iso -nographic -boot d -serial stdio
           expect {
               "sinit is init" {
+                  # Verify yash shell launch
                   send "echo YASH_IS_ALIVE\r"
                   expect {
                       "YASH_IS_ALIVE" {
