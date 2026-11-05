@@ -9,7 +9,7 @@ echo "cproc -O2 -Dconst= -Dvolatile= -Dregister= -static" > conf-cc
 echo "cproc -s -Dconst= -Dvolatile= -Dregister= -static" > conf-ld
 
 # Patch C11 compatibility issues
-sed 's/int (\*op)()/int (*op)(int, char *, int)/g' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h
+sed 's/int (\*op)()/int (*op)(int, char *, int)/g; s/int (\*)()/int (*)(int, char *, int)/g' buffer.h > buffer.h.tmp && mv buffer.h.tmp buffer.h
 sed 's/int (\*op)()/int (*op)(int, char *, int)/g' buffer.c > buffer.c.tmp && mv buffer.c.tmp buffer.c
 sed 's/int (\*op)()/int (*op)(int, char *, int)/g' buffer_put.c > buffer_put.c.tmp && mv buffer_put.c.tmp buffer_put.c
 sed 's/int (\*op)()/int (*op)(int, char *, int)/g' buffer_get.c > buffer_get.c.tmp && mv buffer_get.c.tmp buffer_get.c
