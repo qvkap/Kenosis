@@ -18,6 +18,7 @@ sed 's/(op)/(int (*)(int, char *, int))(op)/g' buffer.h > buffer.h.tmp && mv buf
 sed 's/void (\*sig_defaulthandler)()/void (*sig_defaulthandler)(int)/g; s/void (\*sig_ignorehandler)()/void (*sig_ignorehandler)(int)/g; s/SIG_DFL/(void (\*)(int))SIG_DFL/' sig.c > sig.c.tmp && mv sig.c.tmp sig.c
 sed 's/void (\*sig_defaulthandler)()/void (*sig_defaulthandler)(int)/g; s/void (\*sig_ignorehandler)()/void (*sig_ignorehandler)(int)/g; s/SIG_IGN/(void (\*)(int))SIG_IGN/' sig.c > sig.c.tmp && mv sig.c.tmp sig.c
 sed 's/void (\*sig_defaulthandler)()/void (*sig_defaulthandler)(int)/g; s/void (\*sig_ignorehandler)()/void (*sig_ignorehandler)(int)/g; s/void (\*)()/void (*)(int)/g' sig.h > sig.h.tmp && mv sig.h.tmp sig.h
+sed 's/void sig_catch(int sig,void (\*f)())/void sig_catch(int sig,void (*f)(int))/g' sig_catch.c > sig_catch.c.tmp && mv sig_catch.c.tmp sig_catch.c
 
 for f in try*.c; do
   sed 's/main()/int main(void)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
