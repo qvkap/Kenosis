@@ -124,6 +124,7 @@ jobs:
 
       - name: Automated Boot Test (QEMU)
         run: |
+          # Automated boot testing
           apk add --no-cache qemu-system-x86_64 qemu-ui-curses expect
 
           cat << 'EXP' > test-boot.exp
