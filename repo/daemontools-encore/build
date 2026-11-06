@@ -22,5 +22,7 @@ for f in $(find . -name "*[ch]"); do sed 's/(op)/(int (*)(int, char *, int))(op)
 for f in $(find . -name "*[ch]"); do sed 's/SIG_DFL/(void (*)(int))SIG_DFL/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
 for f in $(find . -name "*[ch]"); do sed 's/SIG_IGN/(void (*)(int))SIG_IGN/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
 
+for f in $(find . -name "try*.c"); do sed 's/^main()/int main(void)/g' "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done
+
 make
 make DESTDIR="$1" install
